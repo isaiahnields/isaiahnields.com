@@ -10,7 +10,12 @@ import {
 
 import {
   to = aws_cloudfront_distribution.s3_distribution
-  id = "E1ZHTV5XY3AP97" # Replace with your CloudFront Distribution ID
+  id = "E1ZHTV5XY3AP97"
+}
+
+import {
+  to = aws_route53_record.cloudfront_alias
+  id = "Z003292815IEA5D8Z77S0_isaiahnields.com_A"
 }
 
 # 1. Create a uniquely named S3 bucket
