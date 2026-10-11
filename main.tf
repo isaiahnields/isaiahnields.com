@@ -172,17 +172,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
-resource "terraform_data" "cloudfront_invalidation" {
-  lifecycle {
-    replace_triggered_by = [
-      # Triggers a reload if the distribution itself updates
-      aws_cloudfront_distribution.cdn,
-    ]
-  }
+resource "terraform_data" "always_invalidate" {
+  input = timestamp() # Forces the resource to update on every run
 
   provisioner "local-exec" {
-    # Executes the AWS CLI command locally using the distribution ID
-    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.cdn.id} --paths '/*'"
+    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.s3_distribution.id} --paths '/*'"
   }
 }
 
