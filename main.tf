@@ -31,7 +31,7 @@ resource "aws_s3_bucket_public_access_block" "block_public" {
 
 # 3. Create an Origin Access Control (OAC) to let CloudFront talk to S3
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "s3-pdf-oac"
+  name                              = "isaiahnields.com.s3.us-east-1.amazonaws.com-mfx8wpp4wgd"
   description                       = "CloudFront access control for private PDF S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
