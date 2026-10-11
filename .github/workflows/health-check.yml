@@ -2,7 +2,7 @@ name: Health Check
 on:
   push:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
   workflow_run:
     workflows: ["Deploy with Terraform"]
