@@ -28,6 +28,11 @@ output "bucket_name" {
   description = "The name of the S3 bucket."
 }
 
+output "cloudfront_distribution_id" {
+  value       = aws_cloudfront_distribution.s3_distribution.id
+  description = "The ID of the CloudFront distribution."
+}
+
 
 # 2. Keep public access strictly blocked at the S3 level
 resource "aws_s3_bucket_public_access_block" "block_public" {
