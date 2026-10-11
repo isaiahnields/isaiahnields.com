@@ -1,4 +1,4 @@
-name: Infrastructure and PDF Deployment Pipeline
+name: Deploy with Terraform
 
 on:
   push:
@@ -9,15 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  # STAGE 1: Provision and update AWS Infrastructure
   terraform:
-    name: "Deploy AWS Infrastructure"
     runs-on: ubuntu-latest
-    
-    # We output variables dynamically from Terraform so the next stage can use them
-    outputs:
-      bucket_name: ${{ steps.set_outputs.outputs.bucket_name }}
-      distribution_id: ${{ steps.set_outputs.outputs.distribution_id }}
 
     steps:
     - name: Checkout Repository
@@ -41,38 +34,10 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
 
-    # Extracts output variables from main.tf to pass down to the storage sync job
-    - name: Export Infrastructure Variables
-      id: set_outputs
-      run: |
-          BUCKET=$(terraform output -raw bucket_name)
-          DIST_ID=$(terraform output -raw cloudfront_distribution_id)
-          echo "bucket_name=$BUCKET" >> $GITHUB_OUTPUT
-          echo "distribution_id=$DIST_ID" >> $GITHUB_OUTPUT
-
-  # STAGE 2: Synchronize and clear cache for PDFs
-  upload_pdf:
-    name: "Upload and Deploy PDFs"
-    needs: terraform # Only runs if the Terraform stage succeeds completely
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    # Syncs your files directly into the newly outputted S3 bucket name
-    - name: Upload PDF to S3
-      run: |
-        aws s3 cp Resume.pdf s3://${{ needs.terraform.outputs.bucket_name }}/Resume.pdf --content-type "application/pdf"
-
     # Instantly flushes the CloudFront cache edge locations so updates go live immediately
     - name: Invalidate CloudFront CDN Cache
       run: |
-        aws cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.distribution_id }} --paths "/*"
+        DIST_ID=$(terraform output -raw cloudfront_distribution_id)
+        aws cloudfront create-invalidation --distribution-id DIST_ID --paths "/*"
+
+
