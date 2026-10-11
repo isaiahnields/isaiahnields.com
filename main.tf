@@ -8,6 +8,11 @@ resource "aws_s3_bucket" "pdf_bucket" {
   bucket = "isaiahnields.com" # Must be globally unique
 }
 
+output "bucket_name" {
+  value       = aws_s3_bucket.pdf_bucket.id
+  description = "The name of the S3 bucket."
+}
+
 # 2. Disable block public access settings so the PDF can be viewed publicly
 resource "aws_s3_bucket_public_access_block" "allow_public" {
   bucket = aws_s3_bucket.pdf_bucket.id
