@@ -1,3 +1,8 @@
+import {
+  to = aws_s3_bucket.pdf_bucket
+  id = "isaiahnields.com"
+}
+
 # 1. Create a uniquely named S3 bucket
 resource "aws_s3_bucket" "pdf_bucket" {
   bucket = "isaiahnields.com" # Must be globally unique
