@@ -170,9 +170,19 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
+}
+
+resource "terraform_data" "cloudfront_invalidation" {
+  lifecycle {
+    replace_triggered_by = [
+      # Triggers a reload if the distribution itself updates
+      aws_cloudfront_distribution.cdn,
+    ]
+  }
 
   provisioner "local-exec" {
-    command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths /*"
+    # Executes the AWS CLI command locally using the distribution ID
+    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.cdn.id} --paths '/*'"
   }
 }
 
