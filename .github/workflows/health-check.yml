@@ -51,7 +51,6 @@ jobs:
               sys.exit(1)
           EOF
           
-          # Replace placeholder paths/URLs if downloading via curl first
-          # curl -sL "https://isaiahnields.com" -o ResumeDownload.pdf
+          curl -sL "https://isaiahnields.com" -o ResumeDownload.pdf
           
           python compare.py
