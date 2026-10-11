@@ -125,7 +125,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   default_root_object = "Resume.pdf"
 
   # ADD YOUR CUSTOM DOMAIN ALIAS HERE
-  aliases = ["://isaiahnields.com"]
+  aliases = ["isaiahnields.com"]
 
   origin {
     domain_name              = aws_s3_bucket.pdf_bucket.bucket_regional_domain_name
