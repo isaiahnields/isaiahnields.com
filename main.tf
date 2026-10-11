@@ -162,10 +162,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     geo_restriction {
       restriction_type = "none"
     }
-
-    provisioner "local-exec" {
-      command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths \"/*\""
-    }
   }
 
   # UPDATE VIEWER CERTIFICATE TO USE YOUR NEW ACM CERTIFICATE
@@ -173,6 +169,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
+  }
+
+  provisioner "local-exec" {
+    command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths \"/*\""
   }
 }
 
