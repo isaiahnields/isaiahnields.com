@@ -2,7 +2,6 @@ name: Sync Resume from Google
 
 on:
   schedule:
-    # Runs daily at midnight (adjust cron as needed)
     - cron: '*/5 * * * *'
   workflow_dispatch: # Allows manual trigger from the Actions tab
 
