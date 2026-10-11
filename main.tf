@@ -35,7 +35,7 @@ resource "aws_s3_bucket_policy" "public_read_policy" {
 # 4. Upload the PDF file from your Git repository to the S3 bucket
 resource "aws_s3_object" "pdf_upload" {
   bucket       = aws_s3_bucket.pdf_bucket.id
-  key          = "sample.pdf"                 # The name the file will have in S3
-  source       = "${path.module}/documents/sample.pdf" # Local path in repo
+  key          = "Resume.pdf"                 # The name the file will have in S3
+  source       = "${path.module}/Resume.pdf" # Local path in repo
   content_type = "application/pdf"            # Ensures it opens in browser instead of downloading
 }
