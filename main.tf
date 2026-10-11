@@ -56,7 +56,7 @@ resource "aws_s3_bucket_policy" "allow_cloudfront" {
         Sid       = "AllowCloudFrontServicePrincipalReadOnly"
         Effect    = "Allow"
         Principal = {
-          Service = "://amazonaws.com"
+          Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.pdf_bucket.arn}/*"
