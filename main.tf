@@ -84,7 +84,7 @@ data "aws_route53_zone" "primary" {
 # 2. Request a free public SSL/TLS Certificate
 resource "aws_acm_certificate" "cert" {
   provider          = aws.us_east_1 # Enforces creation in us-east-1
-  domain_name       = "://isaiahnields.com" # Your target custom subdomain
+  domain_name       = "isaiahnields.com" # Your target custom subdomain
   validation_method = "DNS"
 
   lifecycle {
