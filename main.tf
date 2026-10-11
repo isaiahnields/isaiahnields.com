@@ -175,7 +175,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 # 6. Point your Custom Subdomain to CloudFront using a Route 53 A-Record
 resource "aws_route53_record" "cloudfront_alias" {
   zone_id = data.aws_route53_zone.primary.zone_id
-  name    = "://isaiahnields.com"
+  name    = "isaiahnields.com"
   type    = "A"
 
   alias {
