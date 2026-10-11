@@ -23,16 +23,6 @@ resource "aws_s3_bucket" "pdf_bucket" {
   bucket = "isaiahnields.com" # Must be globally unique
 }
 
-output "bucket_name" {
-  value       = aws_s3_bucket.pdf_bucket.id
-  description = "The name of the S3 bucket."
-}
-
-output "cloudfront_distribution_id" {
-  value       = aws_cloudfront_distribution.s3_distribution.id
-  description = "The ID of the CloudFront distribution."
-}
-
 
 # 2. Keep public access strictly blocked at the S3 level
 resource "aws_s3_bucket_public_access_block" "block_public" {
@@ -171,6 +161,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "none"
+    }
+
+    provisioner "local-exec" {
+      command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths \"/*\""
     }
   }
 
