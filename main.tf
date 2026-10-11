@@ -1,6 +1,6 @@
 # 1. Create a uniquely named S3 bucket
 resource "aws_s3_bucket" "pdf_bucket" {
-  bucket = "my-unique-pdf-hosting-bucket-2026" # Must be globally unique
+  bucket = "isaiahnields.com" # Must be globally unique
 }
 
 # 2. Disable block public access settings so the PDF can be viewed publicly
