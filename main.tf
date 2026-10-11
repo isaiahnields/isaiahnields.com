@@ -33,54 +33,8 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_protocol                  = "sigv4"
 }
 
-# 4. Create the CloudFront Distribution
-resource "aws_cloudfront_distribution" "s3_distribution" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = "CDN for public PDF hosting"
-  default_root_object = "Resume.pdf" # Optional: typing the base domain opens the PDF directly
 
-  # Point CloudFront to your S3 bucket
-  origin {
-    domain_name              = aws_s3_bucket.pdf_bucket.bucket_regional_domain_name
-    origin_id                = "S3-${aws_s3_bucket.pdf_bucket.id}"
-    origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
-  }
-
-  # Configure how files are served and cached
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "S3-${aws_s3_bucket.pdf_bucket.id}"
-    viewer_protocol_policy = "redirect-to-https" # Enforces security
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl     = 0
-    default_ttl = 3600     # Caches the PDF for 1 hour
-    max_ttl     = 86400
-  }
-
-  # Optimize distribution locations (PriceClass_100 uses NA and Europe networks only, keeping costs low)
-  price_class = "PriceClass_100"
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none" # Accessible globally
-    }
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
-}
-
-# 5. Attach a bucket policy allowing ONLY your CloudFront distribution to read from S3
+# 4. Attach a bucket policy allowing ONLY your CloudFront distribution to read from S3
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
   depends_on = [aws_s3_bucket_public_access_block.block_public]
   bucket     = aws_s3_bucket.pdf_bucket.id
@@ -107,7 +61,7 @@ resource "aws_s3_bucket_policy" "allow_cloudfront" {
 }
 
 
-# 6. Upload the PDF
+# 5. Upload the PDF
 resource "aws_s3_object" "pdf_upload" {
   bucket       = aws_s3_bucket.pdf_bucket.id
   key          = "Resume.pdf"                 # The name the file will have in S3
