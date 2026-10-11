@@ -1,50 +1,76 @@
-name: Build & Deploy Terraform Lambda
+name: Infrastructure and PDF Deployment Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main # Automatically runs whenever you push changes to the main branch
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-deploy:
+  # STAGE 1: Provision and update AWS Infrastructure
+  terraform:
+    name: "Deploy AWS Infrastructure"
     runs-on: ubuntu-latest
-    env:
-      TF_IN_AUTOMATION: "true"
+    
+    # We output variables dynamically from Terraform so the next stage can use them
+    outputs:
+      bucket_name: ${{ steps.set_outputs.outputs.bucket_name }}
+      distribution_id: ${{ steps.set_outputs.outputs.distribution_id }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Create build directory
-        run: |
-          mkdir -p build
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false # Disabled to allow output parsing
 
-      - name: Zip Lambda package
-        run: |
-          # Zip lambda folder contents into build/lambda.zip
-          cd lambda
-          zip -r ../build/lambda.zip .
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: "1.5.7"
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+    # Extracts output variables from main.tf to pass down to the storage sync job
+    - name: Export Infrastructure Variables
+      id: set_outputs
+      run: |
+        echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
+        echo "distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
 
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init
+  # STAGE 2: Synchronize and clear cache for PDFs
+  upload_pdf:
+    name: "Upload and Deploy PDFs"
+    needs: terraform # Only runs if the Terraform stage succeeds completely
+    runs-on: ubuntu-latest
 
-      - name: Terraform Apply
-        working-directory: terraform
-        run: terraform apply -auto-approve
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # Syncs your files directly into the newly outputted S3 bucket name
+    - name: Upload PDF to S3
+      run: |
+        aws s3 cp document.pdf s3://${{ needs.terraform.outputs.bucket_name }}/document.pdf --content-type "application/pdf"
+
+    # Instantly flushes the CloudFront cache edge locations so updates go live immediately
+    - name: Invalidate CloudFront CDN Cache
+      run: |
+        aws cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.distribution_id }} --paths "/*"
