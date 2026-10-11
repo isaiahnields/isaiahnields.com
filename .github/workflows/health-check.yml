@@ -49,10 +49,10 @@ jobs:
           text2 = extract_text(local_path)
 
           if text1 == text2:
-              print("Success: PDF contents are identical.")
+              print("Status: Healthy")
               sys.exit(0)
           else:
-              print("Error: PDF contents do not match!")
+              print("Status: Unhealthy")
               # Optional: print or save a diff here
               sys.exit(1)
           EOF
