@@ -172,7 +172,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   provisioner "local-exec" {
-    command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths \"/*\""
+    command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths ./Resume.pdf"
   }
 }
 
