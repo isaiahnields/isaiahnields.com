@@ -1,0 +1,25 @@
+name: Sync Resume from Google
+
+on:
+  schedule:
+    # Runs daily at midnight (adjust cron as needed)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  download-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download PDF from URL
+        run: |
+          curl -L "https://docs.google.com/document/d/1XSzk-_7qreiECAxIOip0r82JFmhwpL6lMEgVXEp_7ik/export?format=pdf" -o "Resume.pdf"
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Resume.pdf
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update PDF from external URL" && git push)
