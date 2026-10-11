@@ -68,7 +68,7 @@ jobs:
     # Syncs your files directly into the newly outputted S3 bucket name
     - name: Upload PDF to S3
       run: |
-        aws s3 cp document.pdf s3://${{ needs.terraform.outputs.bucket_name }}/document.pdf --content-type "application/pdf"
+        aws s3 cp Resume.pdf s3://${{ needs.terraform.outputs.bucket_name }}/Resume.pdf --content-type "application/pdf"
 
     # Instantly flushes the CloudFront cache edge locations so updates go live immediately
     - name: Invalidate CloudFront CDN Cache
