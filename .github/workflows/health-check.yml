@@ -1,0 +1,21 @@
+name: Website Health Check
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 * * * *' # Optional: Runs automatically every hour
+
+jobs:
+  ping-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check website status
+        run: |
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" https://isaiahnields.com)
+          if [ "$STATUS_CODE" -ne 200 ]; then
+            echo "Website is down! Status code: $STATUS_CODE"
+            exit 1
+          else
+            echo "Website is up and running perfectly!"
+          fi
