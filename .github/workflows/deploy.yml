@@ -45,8 +45,10 @@ jobs:
     - name: Export Infrastructure Variables
       id: set_outputs
       run: |
-        echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
-        echo "distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          BUCKET=$(terraform output -raw bucket_name)
+          DIST_ID=$(terraform output -raw cloudfront_distribution_id)
+          echo "bucket_name=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution_id=$DIST_ID" >> $GITHUB_OUTPUT
 
   # STAGE 2: Synchronize and clear cache for PDFs
   upload_pdf:
