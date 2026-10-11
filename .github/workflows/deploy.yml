@@ -3,7 +3,7 @@ name: Deploy with Terraform
 on:
   push:
     branches:
-      - main # Automatically runs whenever you push changes to the main branch
+      - main
 
 permissions:
   contents: read
@@ -26,18 +26,10 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_wrapper: false # Disabled to allow output parsing
+        terraform_wrapper: false
 
     - name: Terraform Init
       run: terraform init
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
-
-    # Instantly flushes the CloudFront cache edge locations so updates go live immediately
-    - name: Invalidate CloudFront CDN Cache
-      run: |
-        DIST_ID=$(terraform output -raw cloudfront_distribution_id)
-        aws cloudfront create-invalidation --distribution-id DIST_ID --paths "/*"
-
-
