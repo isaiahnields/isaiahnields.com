@@ -8,6 +8,11 @@ import {
   id = "E1DDXL2P03HPQX"
 }
 
+import {
+  to = aws_cloudfront_distribution.s3_distribution
+  id = "E1ZHTV5XY3AP97" # Replace with your CloudFront Distribution ID
+}
+
 # 1. Create a uniquely named S3 bucket
 resource "aws_s3_bucket" "pdf_bucket" {
   bucket = "isaiahnields.com" # Must be globally unique
