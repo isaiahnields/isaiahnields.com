@@ -79,6 +79,13 @@ resource "aws_s3_object" "pdf_upload" {
   content_type = "application/pdf"            # Ensures it opens in browser instead of downloading
 }
 
+resource "aws_s3_object" "favicon_upload" {
+  bucket       = aws_s3_bucket.pdf_bucket.id
+  key          = "favicon.ico"
+  source       = "favicon.ico"
+  content_type = "image/vnd.microsoft.icon"
+}
+
 
 # 1. Fetch your existing Route 53 Hosted Zone
 data "aws_route53_zone" "primary" {
